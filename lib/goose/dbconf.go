@@ -25,6 +25,7 @@ type DBConf struct {
 	Env           string
 	Driver        DBDriver
 	PgSchema      string
+	Prefix   	  string // SQL Table Prefix
 }
 
 // extract configuration details from the given file
@@ -48,6 +49,9 @@ func NewDBConf(p, env string, pgschema string) (*DBConf, error) {
 		return nil, err
 	}
 	open = os.ExpandEnv(open)
+
+	prefix, _ := f.Get(fmt.Sprintf("%s.prefix", env))
+	prefix = os.ExpandEnv(prefix)
 
 	// Automatically parse postgres urls
 	if drv == "postgres" {
@@ -79,6 +83,7 @@ func NewDBConf(p, env string, pgschema string) (*DBConf, error) {
 		Env:           env,
 		Driver:        d,
 		PgSchema:      pgschema,
+		Prefix:		   prefix,
 	}, nil
 }
 

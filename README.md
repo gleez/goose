@@ -1,5 +1,7 @@
 # goose
 
+Fork of: https://bitbucket.org/liamstask/goose/overview
+
 goose is a database migration tool.
 
 You can manage your database's evolution by creating incremental SQL or Go scripts.

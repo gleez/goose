@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 )
 
@@ -153,6 +154,8 @@ func runSQLMigration(conf *DBConf, db *sql.DB, scriptFile string, v int64, direc
 	// records the version into the version table or returns an error and
 	// rolls back the transaction.
 	for _, query := range splitSQLStatements(f, direction) {
+		// Add SQL Table Prefix Support
+		query = PrependPrefix(conf, query)
 		if _, err = txn.Exec(query); err != nil {
 			txn.Rollback()
 			log.Fatalf("FAIL %s (%v), quitting migration.", filepath.Base(scriptFile), err)
@@ -165,4 +168,17 @@ func runSQLMigration(conf *DBConf, db *sql.DB, scriptFile string, v int64, direc
 	}
 
 	return nil
+}
+
+func PrependPrefix(conf *DBConf, q string) string {
+	re, err := regexp.Compile("{([a-zA-Z0-9_]+)}")
+	if err != nil {
+		return q
+	}
+	
+	if conf.Prefix == ""{
+		return re.ReplaceAllString(q, "$1")
+	} else {
+		return re.ReplaceAllString(q, conf.Prefix+"$1")
+	}
 }
