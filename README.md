@@ -1,8 +1,6 @@
 # goose
 
-Fork of: https://bitbucket.org/liamstask/goose/overview
-
-goose is a database migration tool.
+goose is a database migration tool from [liamstack/goose](https://bitbucket.org/liamstask/goose/overview) with internal commits.
 
 You can manage your database's evolution by creating incremental SQL or Go scripts.
 
@@ -10,11 +8,11 @@ You can manage your database's evolution by creating incremental SQL or Go scrip
 
 # Install
 
-    $ go get bitbucket.org/liamstask/goose/cmd/goose
+    $ go get github.com/gleez/goose/cmd/goose
 
 This will install the `goose` binary to your `$GOPATH/bin` directory.
 
-You can also build goose into your own applications by importing `bitbucket.org/liamstask/goose/lib/goose`. Documentation is available at [godoc.org](http://godoc.org/bitbucket.org/liamstask/goose/lib/goose).
+You can also build goose into your own applications by importing `github.com/gleez/goose/lib/goose`. Documentation is available at [godoc.org](http://godoc.org/bitbucket.org/liamstask/goose/lib/goose).
 
 NOTE: the API is still new, and may undergo some changes.
 
@@ -27,14 +25,14 @@ goose provides several commands to help manage your database schema.
 Create a new Go migration.
 
     $ goose create AddSomeColumns
-    $ goose: created db/migrations/20130106093224_AddSomeColumns.go
+    $ goose: created db/migrations/20150509093224_AddSomeColumns.go
 
 Edit the newly created script to define the behavior of your migration.
 
 You can also create an SQL migration:
 
     $ goose create AddSomeColumns sql
-    $ goose: created db/migrations/20130106093224_AddSomeColumns.sql
+    $ goose: created db/migrations/20150509093224_AddSomeColumns.sql
 
 ## up
 
@@ -82,8 +80,8 @@ Print the status of all migrations:
     $ goose: status for environment 'development'
     $   Applied At                  Migration
     $   =======================================
-    $   Sun Jan  6 11:25:03 2013 -- 001_basics.sql
-    $   Sun Jan  6 11:25:03 2013 -- 002_next.sql
+    $   Sun May  9 11:25:03 2015 -- 001_basics.sql
+    $   Sun May  9 11:25:03 2015 -- 002_next.sql
     $   Pending                  -- 003_and_again.go
 
 ## dbversion
@@ -191,15 +189,17 @@ A sample `dbconf.yml` looks like
 
 ```yml
 development:
-    driver: postgres
-    open: user=liam dbname=tester sslmode=disable
+  driver: mysql
+  open: user:password@tcp(localhost:3306)/dbname
+  prefix:gl_
 ```
 
-Here, `development` specifies the name of the environment, and the `driver` and `open` elements are passed directly to database/sql to access the specified database.
+Here, `development` specifies the name of the environment, and the `driver`, `open` and `prefix` the SQL table prefix, elements are passed directly to database/sql to access the specified database.
 
 You may include as many environments as you like, and you can use the `-env` command line option to specify which one to use. goose defaults to using an environment called `development`.
 
 goose will expand environment variables in the `open` element. For an example, see the Heroku section below.
+
 
 ## Other Drivers
 goose knows about some common SQL drivers, but it can still be used to run Go-based migrations with any driver supported by `database/sql`. An import path and known dialect are required.
@@ -214,6 +214,7 @@ customdriver:
     open: custom open string
     import: github.com/custom/driver
     dialect: mysql
+    prefix:
 ```
 
 NOTE: Because migrations written in SQL are executed directly by the goose binary, only drivers compiled into goose may be used for these migrations.
@@ -229,7 +230,7 @@ These instructions assume that you're using [Keith Rarick's Heroku Go buildpack]
 // note: need at least one blank line after build constraint
 package main
 
-import _ "bitbucket.org/liamstask/goose/cmd/goose"
+import _ "github.com/gleez/goose/cmd/goose"
 ```
 
 [Set up your Heroku database(s) as usual.](https://devcenter.heroku.com/articles/heroku-postgresql)
@@ -240,6 +241,7 @@ Then make use of environment variable expansion in your `dbconf.yml`:
 production:
     driver: postgres
     open: $DATABASE_URL
+	prefix:
 ```
 
 To run goose in production, use `heroku run`:
